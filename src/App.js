@@ -1,23 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { useState } from "react";
+import Input from "./components/Input";
+import TemperatureAndDetails from "./components/TemperatureAndDetails";
+import TimeAndLocation from "./components/TimeAndLocation";
 
 function App() {
+  const [data, setData] = useState({});
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="py-10">
+      <p className="text-center text-5xl p-5">Weather</p>
+      <Input updateData={(data) => setData(data)} />
+
+      <TimeAndLocation data={data} />
+      <TemperatureAndDetails data={data} />
     </div>
   );
 }
