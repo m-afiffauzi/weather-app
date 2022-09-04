@@ -2,6 +2,7 @@ const PORT = process.env.PORT || 8000;
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const path = require("path");
 require("dotenv").config();
 
 // env variables
@@ -15,8 +16,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
-app.use(express.static("build"));
-
 app.get("/api/", async (req, res, next) => {
   try {
     const params = new URLSearchParams({
@@ -29,5 +28,12 @@ app.get("/api/", async (req, res, next) => {
     console.log(err);
   }
 });
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("build"));
+  app.get("*", (req, res) => {
+    req.sendFile(path.resolve(__dirname, "build", "index.html"));
+  });
+}
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
