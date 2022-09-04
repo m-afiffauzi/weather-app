@@ -11,6 +11,7 @@ function Input(props) {
     axios.get(url).then((response) => {
       props.updateData(response.data);
     });
+    // FIXME: fix this error
   }, [units]);
 
   const getWeather = () => {
@@ -33,16 +34,16 @@ function Input(props) {
             onChange={(event) => setCity(event.target.value)}
             type="text"
             placeholder="search city..."
-            className="px-2 pt-2 pb-1 texl-xl font-bold border border-black rounded-2xl capitalize placeholder:lowercase bg-transparent focus:bg-transparent"
+            className="px-3 pt-2 pb-1 texl-xl font-bold border border-black rounded-2xl capitalize placeholder:lowercase bg-transparent focus:bg-transparent"
           />
           <UilSearch onClick={getWeather} size="20" className="cursor-pointer transition ease-in-out hover:scale-125" />
         </div>
       </div>
 
-      {city ? (
+      {props.data.main ? (
         <div className="flex flex-row-row items-center justify-center">
           <button onClick={() => setUnits("metric")} className="font-mono font-semibold transition ease-in-out hover:scale-125 active:scale-125">
-            <p> °C </p>
+            °C
           </button>
           <p className="font-mono font-bold mx-2">|</p>
           <button onClick={() => setUnits("imperial")} className="font-mono font-semibold transition ease-in-out hover:scale-125 active:scale-125">

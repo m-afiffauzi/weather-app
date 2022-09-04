@@ -40,7 +40,7 @@ function TemperatureAndDetails({ data }) {
       ) : (
         <div className="flex flex-col items-center justify-center text-center text-black gap-1">
           <UilArrowUp size="50" className="-my-5" />
-          <p className="font-bold text-md mt-4">Search city to get current weather info.</p>
+          <p className="font-bold text-md mt-4">Search city to get current weather data.</p>
         </div>
       )}
     </div>
