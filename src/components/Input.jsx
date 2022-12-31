@@ -1,27 +1,30 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { UilSearch, UilMinusCircle } from "@iconscout/react-unicons";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { UilSearch, UilMinusCircle } from '@iconscout/react-unicons';
 
 function Input(props) {
-  const [city, setCity] = useState("");
-  const [units, setUnits] = useState("metric");
+  const [city, setCity] = useState('');
+  const [units, setUnits] = useState('metric');
   const url = `/api?q=${city}&units=${units}`;
+  let letter = '';
+  units === 'metric' ? (letter = 'C') : (letter = 'F');
 
   useEffect(() => {
     axios.get(url).then((response) => {
       props.updateData(response.data);
+      props.updateUnits(letter);
     });
-    // FIXME: fix this error
   }, [units]);
 
   const getWeather = () => {
     axios.get(url).then((response) => {
       props.updateData(response.data);
+      props.updateUnits(letter);
     });
   };
 
   const resetSearch = () => {
-    setCity("");
+    setCity('');
     props.updateData([]);
   };
   return (
@@ -32,6 +35,11 @@ function Input(props) {
           <input
             value={city}
             onChange={(event) => setCity(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                getWeather();
+              }
+            }}
             type="text"
             placeholder="search city..."
             className="px-3 pt-2 pb-1 texl-xl font-bold border border-black rounded-2xl capitalize placeholder:lowercase bg-transparent focus:bg-transparent"
@@ -42,11 +50,11 @@ function Input(props) {
 
       {props.data.main ? (
         <div className="flex flex-row-row items-center justify-center">
-          <button onClick={() => setUnits("metric")} className="font-mono font-semibold transition ease-in-out hover:scale-125 active:scale-125">
+          <button onClick={() => setUnits('metric')} className="font-mono font-semibold transition ease-in-out hover:scale-125 active:scale-125">
             °C
           </button>
           <p className="font-mono font-bold mx-2">|</p>
-          <button onClick={() => setUnits("imperial")} className="font-mono font-semibold transition ease-in-out hover:scale-125 active:scale-125">
+          <button onClick={() => setUnits('imperial')} className="font-mono font-semibold transition ease-in-out hover:scale-125 active:scale-125">
             °F
           </button>
         </div>
