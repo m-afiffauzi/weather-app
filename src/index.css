@@ -5,14 +5,8 @@
 @tailwind utilities;
 
 @layer base {
-  html {
+  body {
+    /* @apply font-primary; */
     font-family: "Josefin Sans", sans-serif;
-    background-color: #ffffff;
-    background-image: linear-gradient(200deg, #ffffff 0%, #4786df 100%);
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-repeat: no-repeat;
   }
 }
