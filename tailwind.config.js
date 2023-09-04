@@ -5,6 +5,9 @@ module.exports = {
       primary: "Poppins",
     },
     extend: {
+      colors: {
+        primary: "#0088ff",
+      },
       backgroundImage: {
         cloudy: "url('/src/assets/img/cloudy.jpg')",
         drizzle: "url('/src/assets/img/drizzle.jpg')",
@@ -17,6 +20,7 @@ module.exports = {
         smoke: "url('/src/assets/img/smoke.jpg')",
         mist: "url('/src/assets/img/mist.jpg')",
         dust: "url('/src/assets/img/dust.jpg')",
+        fog: "url('/src/assets/img/fog.jpg')",
         thunderstorm: "url('/src/assets/img/thunderstorm.jpg')",
       },
       keyframes: {

@@ -71,22 +71,20 @@ const App = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setError("");
-    }, 2000);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [error]);
 
   if (!data) {
     return (
-      <div className="w-full h-screen bg-blue-600 bg-no-repeat bg-cover bg-center flex flex-col items-center justify-center px-4 lg:px-0">
+      <div className="w-full h-screen bg-primary bg-no-repeat bg-cover bg-center flex flex-col items-center justify-center px-4 lg:px-0">
         <div>
           <ImSpinner8 className="text-white text-5xl animate-spin" />
         </div>
       </div>
     );
   }
-
-  console.log(data);
 
   let icon;
   let backgroundImage;
@@ -158,7 +156,6 @@ const App = () => {
   }
 
   const unixDate = new Date(data.dt * 1000);
-  console.log(unixDate.getTime());
 
   return (
     <div
@@ -183,7 +180,7 @@ const App = () => {
           />
           <button
             onClick={(e) => handleSubmit(e)}
-            className="bg-blue-600 hover:bg-blue-500 hover:scale-105 w-16 h-7 flex justify-center items-center transition-all duration-300 rounded-2xl mr-1"
+            className="bg-primary hover:bg-blue-600 hover:scale-105 w-16 h-7 flex justify-center items-center transition-all duration-300 rounded-2xl mr-1"
           >
             <IoMdSearch className="text-lg text-white" />
           </button>
@@ -191,7 +188,7 @@ const App = () => {
         {/* error */}
         {error && (
           <div className="absolute top-2 left-2">
-            <div className="w-full ml-1 py-1 px-16 lg:px-20 bg-red-500 text-white capitalize rounded-full">{`${error.response.data.message}`}</div>
+            <div className="w-full ml-1 py-1 px-16 lg:px-20 bg-red-500 text-sm text-white capitalize rounded-full">{`${error.response.data.message}`}</div>
           </div>
         )}
       </form>
@@ -328,17 +325,33 @@ const App = () => {
         )}
       </div>
       {/* footer */}
-      <footer className="text-white text-md text-center bg-black/80 w-full max-w-sm backdrop:blur-xl my-2 pt-3 h-12 rounded-full">
-        <div>
-          Data provided by{" "}
-          <a
-            href="https://openweathermap.org/"
-            target="_blank"
-            rel="noreferrer"
-            className="text-orange-500 hover:underline"
-          >
-            OpenWeather
-          </a>
+      <footer className=" w-full max-w-sm text-white text-md text-center">
+        <div className="bg-black/80 backdrop:blur-xl my-2 pt-3 h-12 rounded-full">
+          <div>
+            Data provided by{" "}
+            <a
+              href="https://openweathermap.org/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-orange-500 hover:underline"
+            >
+              OpenWeather
+            </a>
+          </div>
+        </div>
+        <div className="bg-black/80 backdrop:blur-xl mb-2 pt-3 h-12 rounded-full">
+          <div>
+            © {unixDate.getFullYear()} {""}
+            <a
+              href="https://m-afiffauzi.vercel.app/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[#28d6b6] hover:underline"
+            >
+              M. A. F.
+            </a>{" "}
+            All Rights Reserved.
+          </div>
         </div>
       </footer>
     </div>
