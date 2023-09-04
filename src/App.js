@@ -26,7 +26,7 @@ const APIKey = process.env.REACT_APP_API_KEY;
 
 const App = () => {
   const [data, setData] = useState(null);
-  const [location, setLocation] = useState("Magelang");
+  const [location, setLocation] = useState("London");
   const [inputValue, setInputValue] = useState("");
   const [animate, setAnimate] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -187,7 +187,7 @@ const App = () => {
         </div>
         {/* error */}
         {error && (
-          <div className="absolute top-2 left-2">
+          <div className="absolute top-[10px] left-2">
             <div className="w-full ml-1 py-1 px-16 lg:px-20 bg-red-500 text-sm text-white capitalize rounded-full">{`${error.response.data.message}`}</div>
           </div>
         )}
