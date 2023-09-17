@@ -7,6 +7,7 @@ import {
   IoMdSnow,
   IoMdThunderstorm,
   IoMdSearch,
+  IoMdClose,
   IoMdArrowUp,
   IoMdArrowDown,
 } from "react-icons/io";
@@ -21,34 +22,80 @@ import {
 } from "react-icons/bs";
 import { TbTemperatureCelsius, TbTornado } from "react-icons/tb";
 import { ImSpinner8 } from "react-icons/im";
+import cityList from "./city-list.json";
+import ashImg from "./assets/img/ash.jpg";
+import cloudyImg from "./assets/img/cloudy.jpg";
+import drizzleImg from "./assets/img/drizzle.jpg";
+import dustImg from "./assets/img/dust.jpg";
+import fogImg from "./assets/img/fog.jpg";
+import hazeImg from "./assets/img/haze.jpg";
+import mistImg from "./assets/img/mist.jpg";
+import rainImg from "./assets/img/rain.jpg";
+import smokeImg from "./assets/img/smoke.jpg";
+import snowImg from "./assets/img/snow.jpg";
+import sunnyImg from "./assets/img/sunny.jpg";
+import tornadoImg from "./assets/img/tornado.jpg";
+import thunderstormImg from "./assets/img/thunderstorm.jpg";
 
 const APIKey = process.env.REACT_APP_API_KEY;
 
 const App = () => {
   const [data, setData] = useState(null);
   const [location, setLocation] = useState("London");
-  const [inputValue, setInputValue] = useState("");
+  const [search, setSearch] = useState("");
+  const [searchData, setSearchData] = useState([]);
   const [animate, setAnimate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleInput = (e) => {
-    setInputValue(e.target.value);
+    setSearch(e.target.value);
+    if (search.length <= 1) {
+      setSearchData([]);
+    } else {
+      getSearchData(search);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      setLocation(search);
+      setSearchData([]);
+      setSearch("");
+    } else {
+      return;
+    }
+  };
+
+  const handleDelete = (e) => {
+    e.preventDefault();
+    setSearch("");
+    setSearchData([]);
   };
 
   const handleSubmit = (e) => {
-    if (inputValue !== "") {
-      setLocation(inputValue);
-    }
-    const input = document.querySelector("input");
-    if (input.value === "") {
+    e.preventDefault();
+    setLocation(search);
+    setSearchData([]);
+    if (search === "") {
       setAnimate(true);
       setTimeout(() => {
         setAnimate(false);
       }, 500);
     }
-    input.value = "";
-    e.preventDefault();
+    setSearch("");
+  };
+
+  const getSearchData = (search) => {
+    if (search !== "") {
+      const filteredCity = cityList.filter((city) => {
+        return city.name.toLowerCase().startsWith(search.toLowerCase());
+      });
+      setSearchData(filteredCity.slice(0, 10));
+    } else {
+      setSearchData([]);
+    }
   };
 
   useEffect(() => {
@@ -88,70 +135,87 @@ const App = () => {
 
   let icon;
   let backgroundImage;
+  let placeholderImage;
   switch (data.weather[0].main) {
     case "Clouds":
       icon = <IoMdCloudy />;
-      backgroundImage = "bg-cloudy";
+      backgroundImage = cloudyImg;
+      placeholderImage = "bg-cloudy";
       break;
     case "Rain":
       icon = <IoMdRainy />;
-      backgroundImage = "bg-rain";
+      backgroundImage = rainImg;
+      placeholderImage = "bg-rain";
       break;
     case "Clear":
       icon = <IoMdSunny />;
-      backgroundImage = "bg-sunny";
+      backgroundImage = sunnyImg;
+      placeholderImage = "bg-sunny";
       break;
     case "Drizzle":
       icon = <BsCloudDrizzleFill />;
-      backgroundImage = "bg-drizzle";
+      backgroundImage = drizzleImg;
+      placeholderImage = "bg-drizzle";
       break;
     case "Snow":
       icon = <IoMdSnow />;
-      backgroundImage = "bg-snow";
+      backgroundImage = snowImg;
+      placeholderImage = "bg-snow";
       break;
     case "Thunderstorm":
       icon = <IoMdThunderstorm />;
-      backgroundImage = "bg-thunderstorm";
+      backgroundImage = thunderstormImg;
+      placeholderImage = "bg-thunderstorm";
       break;
     case "Mist":
       icon = <BsCloudHaze2Fill />;
-      backgroundImage = "bg-mist";
+      backgroundImage = mistImg;
+      placeholderImage = "bg-mist";
       break;
     case "Smoke":
       icon = <BsCloudHaze2Fill />;
-      backgroundImage = "bg-smoke";
+      backgroundImage = smokeImg;
+      placeholderImage = "bg-smoke";
       break;
     case "Haze":
       icon = <BsCloudHaze2Fill />;
-      backgroundImage = "bg-haze";
+      backgroundImage = hazeImg;
+      placeholderImage = "bg-haze";
       break;
     case "Dust":
       icon = <BsCloudHaze2Fill />;
-      backgroundImage = "bg-dust";
+      backgroundImage = dustImg;
+      placeholderImage = "bg-dust";
       break;
     case "Fog":
       icon = <BsCloudHaze2Fill />;
-      backgroundImage = "bg-fog";
+      backgroundImage = fogImg;
+      placeholderImage = "bg-fog";
       break;
     case "Sand":
       icon = <BsCloudHaze2Fill />;
-      backgroundImage = "bg-dust";
+      backgroundImage = dustImg;
+      placeholderImage = "bg-dust";
       break;
     case "Ash":
       icon = <BsCloudHaze2Fill />;
-      backgroundImage = "bg-ash";
+      backgroundImage = ashImg;
+      placeholderImage = "bg-ash";
       break;
     case "Squall":
       icon = <BsCloudHaze2Fill />;
-      backgroundImage = "bg-haze";
+      backgroundImage = hazeImg;
+      placeholderImage = "bg-haze";
       break;
     case "Tornado":
       icon = <TbTornado />;
-      backgroundImage = "bg-tornado";
+      backgroundImage = tornadoImg;
+      placeholderImage = "bg-tornado";
       break;
     default:
       icon = <IoMdSunny />;
-      backgroundImage = "bg-sunny";
+      backgroundImage = sunnyImg;
+      placeholderImage = "bg-sunny";
       break;
   }
 
@@ -159,31 +223,79 @@ const App = () => {
 
   return (
     <div
-      className={`min-w-full min-h-screen ${backgroundImage} bg-no-repeat bg-cover bg-center transition-all flex flex-col items-center justify-center px-4 lg:px-0`}
+      className={`relative min-w-full min-h-screen transition-all flex flex-col items-center justify-center px-4 lg:px-0`}
     >
+      <img
+        loading="lazy"
+        src={backgroundImage}
+        alt="Background"
+        width={100}
+        height={100}
+        className={`absolute top-0 left-0 w-full h-full -z-10 object-cover ${placeholderImage} bg-no-repeat bg-cover bg-center`}
+      />
       {/* app name */}
       <h1 className="text-white text-2xl font-bold text-center bg-black/80 w-full max-w-sm backdrop:blur-xl my-2 px-2 pt-2 h-12 rounded-full">
         --- Weather ---
       </h1>
       {/* form */}
       <form
-        onChange={handleInput}
         className={`${
           animate ? "animate-shake" : "animate-none"
         } relative h-12 mb-2 bg-black/80 w-full max-w-sm backdrop:blur-xl rounded-full`}
       >
         <div className="h-full relative flex items-center justify-between p-2">
           <input
-            className="flex-1 bg-transparent capitalize outline-none placeholder:text-white text-white text-md font-light pl-6 h-full"
             type="text"
+            value={search}
+            autoComplete="off"
+            onChange={handleInput}
+            onKeyDown={handleKeyDown}
+            className="flex-1 bg-transparent capitalize outline-none placeholder:text-white text-white text-md font-light pl-6 h-full"
             placeholder="Search city / country ..."
           />
+          {search !== "" && (
+            <button
+              id="delete"
+              aria-label="delete"
+              onClick={handleDelete}
+              className="bg-red-400 hover:bg-red-500 hover:scale-105 w-7 h-7 flex justify-center items-center transition-all duration-300 rounded-2xl mr-2"
+            >
+              <IoMdClose className="text-lg text-white" />
+            </button>
+          )}
           <button
+            id="search"
+            aria-label="search"
             onClick={(e) => handleSubmit(e)}
             className="bg-primary hover:bg-blue-600 hover:scale-105 w-16 h-7 flex justify-center items-center transition-all duration-300 rounded-2xl mr-1"
           >
             <IoMdSearch className="text-lg text-white" />
           </button>
+
+          <ul
+            className={`absolute w-96 bg-white flex flex-col rounded-2xl top-[52px] left-0`}
+          >
+            {searchData?.map((city) => {
+              return (
+                <li
+                  onClick={(e) => {
+                    setSearch(city.name);
+                    setSearchData([]);
+                  }}
+                  key={city.id}
+                  className="bg-white hover:bg-primary focus-within:bg-primary cursor-pointer rounded-2xl overflow-clip"
+                >
+                  <button
+                    id={city.name}
+                    aria-label={city.name}
+                    className="w-full px-2 py-1  text-start outline-none"
+                  >
+                    {city.name}, {city.country}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </div>
         {/* error */}
         {error && (
