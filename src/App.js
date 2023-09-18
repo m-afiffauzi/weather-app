@@ -58,8 +58,6 @@ const App = () => {
     }
   };
 
-  console.log(searchData);
-
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -97,7 +95,7 @@ const App = () => {
         // `${url}/cities?namePrefix=${search}&limit=10&sort=-population&sort=name`,
         // geoApiOtions
 
-        `http://api.openweathermap.org/geo/1.0/direct?q=${search}&limit=5&appid=${APIKey}`
+        `https://api.openweathermap.org/geo/1.0/direct?q=${search}&limit=5&appid=${APIKey}`
       )
       .then((res) => {
         setSearchData(res.data);
@@ -239,7 +237,6 @@ const App = () => {
   }
 
   const unixDate = new Date(data.dt * 1000 + data.timezone * 1000);
-  console.log(unixDate);
   const month = [
     "January",
     "February",
