@@ -22,7 +22,6 @@ import {
 } from "react-icons/bs";
 import { TbTemperatureCelsius, TbTornado } from "react-icons/tb";
 import { ImSpinner8 } from "react-icons/im";
-import cityList from "./city-list.json";
 import ashImg from "./assets/img/ash.jpg";
 import cloudyImg from "./assets/img/cloudy.jpg";
 import drizzleImg from "./assets/img/drizzle.jpg";
@@ -37,6 +36,9 @@ import sunnyImg from "./assets/img/sunny.jpg";
 import tornadoImg from "./assets/img/tornado.jpg";
 import thunderstormImg from "./assets/img/thunderstorm.jpg";
 
+// NOTE: This is optional search API
+// import { url, geoApiOtions } from "./lib/api";
+
 const APIKey = process.env.REACT_APP_API_KEY;
 
 const App = () => {
@@ -49,13 +51,14 @@ const App = () => {
   const [error, setError] = useState("");
 
   const handleInput = (e) => {
-    setSearch(e.target.value);
-    if (search.length <= 1) {
-      setSearchData([]);
-    } else {
-      getSearchData(search);
+    const newSearch = e.target.value;
+    setSearch(newSearch);
+    if (newSearch !== "") {
+      getSearchData(newSearch);
     }
   };
+
+  console.log(searchData);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -88,14 +91,30 @@ const App = () => {
   };
 
   const getSearchData = (search) => {
-    if (search !== "") {
-      const filteredCity = cityList.filter((city) => {
-        return city.name.toLowerCase().startsWith(search.toLowerCase());
+    return axios
+      .get(
+        // NOTE: Optional search url
+        // `${url}/cities?namePrefix=${search}&limit=10&sort=-population&sort=name`,
+        // geoApiOtions
+
+        `http://api.openweathermap.org/geo/1.0/direct?q=${search}&limit=5&appid=${APIKey}`
+      )
+      .then((res) => {
+        setSearchData(res.data);
+
+        // NOTE: This is optional search results
+        // searchData(
+        //   res.data.map((city) => {
+        //     return {
+        //       name: `${city.name}`,
+        //       state: `${city.region}`,
+        //       country: `${city.country}`,
+        //       lat: `${city.latitude}`,
+        //       lon: `${city.longitude}`,
+        //     };
+        //   })
+        // );
       });
-      setSearchData(filteredCity.slice(0, 10));
-    } else {
-      setSearchData([]);
-    }
   };
 
   useEffect(() => {
@@ -219,12 +238,27 @@ const App = () => {
       break;
   }
 
-  const unixDate = new Date(data.dt * 1000);
+  const unixDate = new Date(data.dt * 1000 + data.timezone * 1000);
+  console.log(unixDate);
+  const month = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
 
   return (
-    <div
-      className={`relative min-w-full min-h-screen transition-all flex flex-col items-center justify-center px-4 lg:px-0`}
-    >
+    // cotainer
+    <div className="relative min-w-full min-h-screen transition-all flex flex-col items-center justify-center px-4 lg:px-0">
+      {/* background image */}
       <img
         loading="lazy"
         src={backgroundImage}
@@ -233,17 +267,21 @@ const App = () => {
         height={100}
         className={`absolute top-0 left-0 w-full h-full -z-10 object-cover ${placeholderImage} bg-no-repeat bg-cover bg-center`}
       />
+
       {/* app name */}
       <h1 className="text-white text-2xl font-bold text-center bg-black/80 w-full max-w-sm backdrop:blur-xl my-2 px-2 pt-2 h-12 rounded-full">
         --- Weather ---
       </h1>
+
       {/* form */}
       <form
         className={`${
           animate ? "animate-shake" : "animate-none"
         } relative h-12 mb-2 bg-black/80 w-full max-w-sm backdrop:blur-xl rounded-full`}
       >
+        {/* input container */}
         <div className="h-full relative flex items-center justify-between p-2">
+          {/* input */}
           <input
             type="text"
             value={search}
@@ -253,6 +291,8 @@ const App = () => {
             className="flex-1 bg-transparent capitalize outline-none placeholder:text-white text-white text-md font-light pl-6 h-full"
             placeholder="Search city / country ..."
           />
+
+          {/* delete search button */}
           {search !== "" && (
             <button
               id="delete"
@@ -263,6 +303,8 @@ const App = () => {
               <IoMdClose className="text-lg text-white" />
             </button>
           )}
+
+          {/* search button */}
           <button
             id="search"
             aria-label="search"
@@ -272,31 +314,36 @@ const App = () => {
             <IoMdSearch className="text-lg text-white" />
           </button>
 
+          {/* search suggestion */}
           <ul
             className={`absolute w-96 bg-white flex flex-col rounded-2xl top-[52px] left-0`}
           >
-            {searchData?.map((city) => {
-              return (
-                <li
-                  onClick={(e) => {
-                    setSearch(city.name);
-                    setSearchData([]);
-                  }}
-                  key={city.id}
-                  className="bg-white hover:bg-primary focus-within:bg-primary cursor-pointer rounded-2xl overflow-clip"
-                >
-                  <button
-                    id={city.name}
-                    aria-label={city.name}
-                    className="w-full px-2 py-1  text-start outline-none"
+            {search !== "" &&
+              searchData.map((city, i) => {
+                return (
+                  <li
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setSearch(city.name + ", " + city.country);
+                      setSearchData([]);
+                    }}
+                    key={city.name + "-" + i}
+                    className="bg-white hover:bg-primary focus-within:bg-primary cursor-pointer rounded-2xl overflow-clip"
                   >
-                    {city.name}, {city.country}
-                  </button>
-                </li>
-              );
-            })}
+                    <button
+                      id={city.name}
+                      aria-label={city.name}
+                      className="w-full px-2 py-1  text-start outline-none"
+                    >
+                      {city.name}, {city.state ? `${city.state},` : null}{" "}
+                      {city.country}
+                    </button>
+                  </li>
+                );
+              })}
           </ul>
         </div>
+
         {/* error */}
         {error && (
           <div className="absolute top-[10px] left-2">
@@ -304,6 +351,7 @@ const App = () => {
           </div>
         )}
       </form>
+
       {/* card */}
       <div className="w-full max-w-sm bg-black/80 min-h-[500px] text-white backdrop:blur-[32px] py-6 px-6 rounded-3xl">
         {loading ? (
@@ -321,19 +369,19 @@ const App = () => {
                 <div className="text-2xl font-semibold">
                   {data.name}, {data.sys.country}
                 </div>
+
                 {/* date */}
                 <div>
-                  {unixDate.getHours()}:{unixDate.getMinutes()}
+                  {("00" + unixDate.getUTCHours()).slice(-2)}:
+                  {("00" + unixDate.getUTCMinutes()).slice(-2)}
                 </div>
                 <div>
-                  {unixDate.toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "long",
-                    day: "2-digit",
-                  })}
+                  {unixDate.getUTCDate()} {month[unixDate.getUTCMonth()]}{" "}
+                  {unixDate.getUTCFullYear()}
                 </div>
               </div>
             </div>
+
             {/* card body */}
             <div className="my-10">
               <div className="flex justify-center items-center">
@@ -341,22 +389,27 @@ const App = () => {
                 <div className="text-8xl leading-none font-light">
                   {parseInt(data.main.temp)}
                 </div>
+
                 {/* temp metric */}
                 <div className="text-4xl">
                   <TbTemperatureCelsius />
                 </div>
               </div>
+
               {/* weather */}
               <div className="capitalize text-center font-bold text-xl mb-2">
                 -- {data.weather[0].main} --
               </div>
+
               {/* weather description */}
               <div className="capitalize text-center text-xs">
                 - {data.weather[0].description} -
               </div>
             </div>
+
             {/* card bottom */}
             <div className="max-w-sm mx-auto flex flex-col gap-y-4 text-xs lg:text-base">
+              {/* feels like */}
               <div className="flex justify-center">
                 <div className="text-xl">
                   <BsThermometer />
@@ -368,6 +421,8 @@ const App = () => {
                   </span>
                 </div>
               </div>
+
+              {/* min-max temp */}
               <div className="flex justify-between">
                 <div className="flex items-center gap-x-1">
                   {/* icon */}
@@ -394,6 +449,8 @@ const App = () => {
                   </div>
                 </div>
               </div>
+
+              {/* visibilit & humidity */}
               <div className="flex justify-between">
                 <div className="flex items-center gap-x-1">
                   {/* icon */}
@@ -412,6 +469,8 @@ const App = () => {
                   <div className="ml-1">Humidity: {data.main.humidity} %</div>
                 </div>
               </div>
+
+              {/* pressure & wind */}
               <div className="flex justify-between">
                 <div className="flex items-center gap-x-1">
                   {/* icon */}
@@ -436,8 +495,10 @@ const App = () => {
           </div>
         )}
       </div>
+
       {/* footer */}
       <footer className=" w-full max-w-sm text-white text-md text-center">
+        {/* data provider */}
         <div className="bg-black/80 backdrop:blur-xl my-2 pt-3 h-12 rounded-full">
           <div>
             Data provided by{" "}
@@ -451,6 +512,8 @@ const App = () => {
             </a>
           </div>
         </div>
+
+        {/* copyrights */}
         <div className="bg-black/80 backdrop:blur-xl mb-2 pt-3 h-12 rounded-full">
           <div>
             © {unixDate.getFullYear()} {""}
