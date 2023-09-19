@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import debounce from "lodash.debounce";
 import {
   IoMdSunny,
   IoMdRainy,
@@ -43,76 +44,22 @@ const APIKey = process.env.REACT_APP_API_KEY;
 
 const App = () => {
   const [data, setData] = useState(null);
+  const [query, setQuery] = useState("");
   const [location, setLocation] = useState("London");
-  const [search, setSearch] = useState("");
-  const [searchData, setSearchData] = useState([]);
+  const [suggestion, setSuggestion] = useState([]);
   const [animate, setAnimate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleInput = (e) => {
-    const newSearch = e.target.value;
-    setSearch(newSearch);
-    if (newSearch !== "") {
-      getSearchData(newSearch);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      setLocation(search);
-      setSearchData([]);
-      setSearch("");
-    } else {
-      return;
-    }
-  };
-
-  const handleDelete = (e) => {
-    e.preventDefault();
-    setSearch("");
-    setSearchData([]);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setLocation(search);
-    setSearchData([]);
-    if (search === "") {
-      setAnimate(true);
-      setTimeout(() => {
-        setAnimate(false);
-      }, 500);
-    }
-    setSearch("");
-  };
-
-  const getSearchData = (search) => {
-    return axios
-      .get(
-        // NOTE: Optional search url
-        // `${url}/cities?namePrefix=${search}&limit=10&sort=-population&sort=name`,
-        // geoApiOtions
-
-        `https://api.openweathermap.org/geo/1.0/direct?q=${search}&limit=5&appid=${APIKey}`
-      )
-      .then((res) => {
-        setSearchData(res.data);
-
-        // NOTE: This is optional search results
-        // searchData(
-        //   res.data.map((city) => {
-        //     return {
-        //       name: `${city.name}`,
-        //       state: `${city.region}`,
-        //       country: `${city.country}`,
-        //       lat: `${city.latitude}`,
-        //       lon: `${city.longitude}`,
-        //     };
-        //   })
-        // );
-      });
+  const getSuggestion = async (query) => {
+    console.log("Geocoding API request");
+    const res = await axios.get(
+      // NOTE: Optional search url
+      // `${url}/cities?namePrefix=${query}&limit=10&sort=-population&sort=name`,
+      // geoApiOtions
+      `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${APIKey}`
+    );
+    return res.data;
   };
 
   useEffect(() => {
@@ -139,6 +86,50 @@ const App = () => {
 
     return () => clearTimeout(timer);
   }, [error]);
+
+  const request = debounce(async (query) => {
+    const result = await getSuggestion(query);
+    setSuggestion(result);
+  }, 1000);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debounceRequest = useCallback((query) => request(query), []);
+
+  const handleInput = (e) => {
+    let newValue = e.target.value;
+    setQuery(newValue);
+    debounceRequest(newValue);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      setLocation(query);
+      setSuggestion([]);
+      setQuery("");
+    } else {
+      return;
+    }
+  };
+
+  const handleDelete = (e) => {
+    e.preventDefault();
+    setQuery("");
+    setSuggestion([]);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLocation(query);
+    setSuggestion([]);
+    if (query === "") {
+      setAnimate(true);
+      setTimeout(() => {
+        setAnimate(false);
+      }, 500);
+    }
+    setQuery("");
+  };
 
   if (!data) {
     return (
@@ -254,7 +245,7 @@ const App = () => {
 
   return (
     // cotainer
-    <div className="relative min-w-full min-h-screen transition-all flex flex-col items-center justify-center px-4 lg:px-0">
+    <div className="relative min-w-full min-h-screen transition-all flex flex-col items-center justify-center px-2 lg:px-0">
       {/* background image */}
       <img
         loading="lazy"
@@ -267,7 +258,7 @@ const App = () => {
 
       {/* app name */}
       <h1 className="text-white text-2xl font-bold text-center bg-black/80 w-full max-w-sm backdrop:blur-xl my-2 px-2 pt-2 h-12 rounded-full">
-        --- Weather ---
+        Weather App
       </h1>
 
       {/* form */}
@@ -281,8 +272,7 @@ const App = () => {
           {/* input */}
           <input
             type="text"
-            value={search}
-            autoComplete="off"
+            value={query}
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             className="flex-1 bg-transparent capitalize outline-none placeholder:text-white text-white text-md font-light pl-6 h-full"
@@ -290,7 +280,7 @@ const App = () => {
           />
 
           {/* delete search button */}
-          {search !== "" && (
+          {query !== "" && (
             <button
               id="delete"
               aria-label="delete"
@@ -313,16 +303,16 @@ const App = () => {
 
           {/* search suggestion */}
           <ul
-            className={`absolute w-96 bg-white flex flex-col rounded-2xl top-[52px] left-0`}
+            className={`absolute w-96 bg-white flex flex-col rounded-2xl top-[52px] left-0 z-10`}
           >
-            {search !== "" &&
-              searchData.map((city, i) => {
+            {query !== "" &&
+              suggestion.map((city, i) => {
                 return (
                   <li
                     onClick={(e) => {
                       e.preventDefault();
-                      setSearch(city.name + ", " + city.country);
-                      setSearchData([]);
+                      setQuery(city.name + ", " + city.country);
+                      setSuggestion([]);
                     }}
                     key={city.name + "-" + i}
                     className="bg-white hover:bg-primary focus-within:bg-primary cursor-pointer rounded-2xl overflow-clip"
@@ -349,8 +339,41 @@ const App = () => {
         )}
       </form>
 
+      {/* info modal */}
+      <dialog
+        id="info-modal"
+        className="max-w-sm rounded-3xl bg-primary text-white"
+      >
+        <h2 className="text-xl font-bold text-center">---- Info ----</h2>
+        <p className="px-4 py-2 text-sm">
+          Please note that using suggestion result to search weather data might
+          resulting invalid search due to difference data provided between
+          Geocoding API and Current Weather API. If that happen, just search and
+          ignore the suggestion.
+        </p>
+        <form method="dialog" className="flex items-center justify-center mt-2">
+          {/* if there is a button in form, it will close the modal */}
+          <button
+            id="close-modal"
+            aria-label="close-modal"
+            className="bg-white hover:bg-red-500 text-black hover:text-white w-16 h-7 flex justify-center items-center transition-all duration-300 rounded-2xl"
+          >
+            <p className="mt-1">Close</p>
+          </button>
+        </form>
+      </dialog>
+
       {/* card */}
-      <div className="w-full max-w-sm bg-black/80 min-h-[500px] text-white backdrop:blur-[32px] py-6 px-6 rounded-3xl">
+      <div className="relative w-full max-w-sm bg-black/80 min-h-[500px] text-white backdrop:blur-[32px] py-6 px-6 rounded-3xl">
+        {/* modal button */}
+        <button
+          id="open-modal"
+          aria-label="open-modal"
+          className="bg-white text-black hover:bg-primary hover:text-white absolute top-3 right-3 w-7 h-7 flex justify-center items-center transition-all duration-300 rounded-2xl"
+          onClick={() => document.getElementById("info-modal").showModal()}
+        >
+          i
+        </button>
         {loading ? (
           <div className="w-full min-h-[400px] flex justify-center items-center">
             <ImSpinner8 className="text-white text-5xl animate-spin" />
@@ -405,7 +428,7 @@ const App = () => {
             </div>
 
             {/* card bottom */}
-            <div className="max-w-sm mx-auto flex flex-col gap-y-4 text-xs lg:text-base">
+            <div className="max-w-sm mx-auto flex flex-col gap-y-4 text-sm sm:text-base">
               {/* feels like */}
               <div className="flex justify-center">
                 <div className="text-xl">

@@ -14,6 +14,9 @@ dependencies:
   '@testing-library/user-event':
     specifier: ^13.5.0
     version: 13.5.0(@testing-library/dom@8.17.1)
+  lodash.debounce:
+    specifier: ^4.0.8
+    version: 4.0.8
   react:
     specifier: ^18.2.0
     version: 18.2.0
